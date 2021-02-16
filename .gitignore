@@ -1,129 +1,143 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+from tkinter import *
+import pygame
+from tkinter import filedialog, ttk
 
-# C extensions
-*.so
+root = Tk()
+root.title('Sounds')
+root.geometry('1000x1000')
+root.resizable(0, 0)
+root.configure(bg='black')
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# turning on pygame
+pygame.mixer.init()
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# images
+img = PhotoImage(file='C:/Users/16097/Downloads/audio image.gif')
+root.tk.call('wm', 'iconphoto', root, img)
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+my_label = Label(root, text='MP3', bg='black', fg='white')
+my_label.configure(font=('Calibri', 80, 'bold'))
+my_label.place(x=725, y=50)
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
+my_label2 = Label(root, text='Player', bg='black', fg='white')
+my_label2.configure(font=('Calibri', 80, 'bold'))
+my_label2.place(x=685, y=170)
 
-# Translations
-*.mo
-*.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# functions
+def play_audio():
+    song = song_box.get(ACTIVE)
+    current_song = Label(root, text=song, bg='black', fg='white')
+    current_song.configure(font=('Calibri', 25, 'bold'))
+    current_song.place(x=240, y=1)
+    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
 
-# Flask stuff:
-instance/
-.webassets-cache
 
-# Scrapy stuff:
-.scrapy
+def stop_audio():
+    pygame.mixer.music.stop()
 
-# Sphinx documentation
-docs/_build/
 
-# PyBuilder
-target/
+def next_song():
+    next_one = song_box.curselection()
+    next_one = next_one[0] + 1
+    song = song_box.get(next_one)
+    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    song_box.select_clear(0, END)
+    song_box.activate(next_one)
+    song_box.selection_set(next_one, last=None)
+    song = song_box.get(ACTIVE)
+    current_song = Label(root, text=song, bg='black', fg='white')
+    current_song.configure(font=('Calibri', 25, 'bold'))
+    current_song.place(x=200, y=451)
 
-# Jupyter Notebook
-.ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
+def past_song():
+    next_one = song_box.curselection()
+    next_one = next_one[0] - 1
+    song = song_box.get(next_one)
+    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    song_box.select_clear(0, END)
+    song_box.activate(next_one)
+    song_box.selection_set(next_one, last=None)
+    song = song_box.get(ACTIVE)
+    current_song = Label(root, text=song, bg='black', fg='white')
+    current_song.configure(font=('Calibri', 25, 'bold'))
+    current_song.place(x=200, y=451)
 
-# pyenv
-.python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+global pause
+pause = False
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+def pause_audio(is_paused):
+    global pause
+    pause = is_paused
+    if pause:
+        pygame.mixer.music.unpause()
+        pause = False
+    else:
+        pygame.mixer.music.pause()
+        pause = True
 
-# SageMath parsed files
-*.sage.py
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+def volume(x):
+    pygame.mixer.music.set_volume(volume_slider.get())
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
-# Rope project settings
-.ropeproject
+def add_song():
+    songs = filedialog.askopenfilenames(initialdir='C:/Users/16097/Downloads', title='Select A File', filetypes=(("MP3 files", "*.mp3"),))
+    for song in songs:
+        song = song.replace('C:/Users/16097/Downloads/', '')
+        song = song.replace('.mp3', '')
+        song_box.insert(END, song)
 
-# mkdocs documentation
-/site
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# button images
+play_img = PhotoImage(file='C:/Users/16097/Downloads/play button2.gif')
+stop_img = PhotoImage(file='C:/Users/16097/Downloads/stop button2.gif')
+pause_img = PhotoImage(file='C:/Users/16097/Downloads/pause button2.gif')
+nextsong_img = PhotoImage(file='C:/Users/16097/Downloads/next song button2.gif')
+pastsong_img = PhotoImage(file='C:/Users/16097/Downloads/past song button2.gif')
 
-# Pyre type checker
-.pyre/
+# buttons
+play_button = Button(root, image=play_img, borderwidth=0, width=115, height=115, command=play_audio)
+play_button.place(x=45, y=380)
+stop_button = Button(root, image=stop_img, borderwidth=0, width=115, height=115, command=stop_audio)
+stop_button.place(x=168, y=380)
+pause_button = Button(root, image=pause_img, borderwidth=0, width=115, height=115, command=lambda: pause_audio(pause))
+pause_button.place(x=293, y=380)
+nextsong_button = Button(root, image=nextsong_img, borderwidth=0, width=115, height=115, command=next_song)
+nextsong_button.place(x=540, y=380)
+pastsong_button = Button(root, image=pastsong_img, borderwidth=0, width=115, height=115, command=past_song)
+pastsong_button.place(x=415, y=380)
+
+# song box
+song_box = Listbox(root, bg='white', fg='black', height=20, width=100)
+song_box.place(x=50, y=47)
+
+# labels
+now_playing = Label(root, text='Now Playing:', bg='black', fg='white')
+now_playing.configure(font=('Calibri', 25, 'bold'))
+now_playing.place(x=45, y=00)
+
+# song menu
+my_menu = Menu(root)
+root.config(menu=my_menu)
+
+# add song menu
+add_song_menu = Menu(my_menu)
+my_menu.add_cascade(label="Add Songs", menu=add_song_menu)
+add_song_menu.add_command(label="Add Song to Playlist", command=add_song)
+
+# volume slider
+volume_slider = ttk.Scale(root, from_=0, to=1, orient=HORIZONTAL, value=1, command=volume, length=250)
+volume_slider.place(x=700, y=430)
+
+
+root.mainloop()
