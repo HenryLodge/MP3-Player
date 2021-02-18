@@ -1,10 +1,12 @@
 from tkinter import *
 import pygame
 from tkinter import filedialog, ttk
+from mutagen.mp3 import MP3
+import time
 
 root = Tk()
 root.title('Sounds')
-root.geometry('1000x1000')
+root.geometry('1000x550')
 root.resizable(0, 0)
 root.configure(bg='black')
 
@@ -12,7 +14,7 @@ root.configure(bg='black')
 pygame.mixer.init()
 
 # images
-img = PhotoImage(file='C:/Users/16097/Downloads/audio image.gif')
+img = PhotoImage(file='C:/Users/henry/Downloads/audio image.gif')
 root.tk.call('wm', 'iconphoto', root, img)
 
 my_label = Label(root, text='MP3', bg='black', fg='white')
@@ -30,45 +32,47 @@ def play_audio():
     current_song = Label(root, text=song, bg='black', fg='white')
     current_song.configure(font=('Calibri', 25, 'bold'))
     current_song.place(x=240, y=1)
-    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    song = f'C:/Users/henry/Downloads/{song}.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
+    play_time()
 
 
 def stop_audio():
     pygame.mixer.music.stop()
+    status_bar.config(text='')
 
 
 def next_song():
     next_one = song_box.curselection()
     next_one = next_one[0] + 1
     song = song_box.get(next_one)
-    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    song = f'C:/Users/henry/Downloads/{song}.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     song_box.select_clear(0, END)
     song_box.activate(next_one)
     song_box.selection_set(next_one, last=None)
     song = song_box.get(ACTIVE)
-    current_song = Label(root, text=song, bg='black', fg='white')
+    current_song = Label(root, text=f'{song}                                                 ', bg='black', fg='white')
     current_song.configure(font=('Calibri', 25, 'bold'))
-    current_song.place(x=200, y=451)
+    current_song.place(x=240, y=0)
 
 
 def past_song():
     next_one = song_box.curselection()
     next_one = next_one[0] - 1
     song = song_box.get(next_one)
-    song = f'C:/Users/16097/Downloads/{song}.mp3'
+    song = f'C:/Users/henry/Downloads/{song}.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     song_box.select_clear(0, END)
     song_box.activate(next_one)
     song_box.selection_set(next_one, last=None)
     song = song_box.get(ACTIVE)
-    current_song = Label(root, text=song, bg='black', fg='white')
+    current_song = Label(root, text=f'{song}                                                 ', bg='black', fg='white')
     current_song.configure(font=('Calibri', 25, 'bold'))
-    current_song.place(x=200, y=451)
+    current_song.place(x=240, y=0)
 
 
 global pause
@@ -91,19 +95,37 @@ def volume(x):
 
 
 def add_song():
-    songs = filedialog.askopenfilenames(initialdir='C:/Users/16097/Downloads', title='Select A File', filetypes=(("MP3 files", "*.mp3"),))
+    songs = filedialog.askopenfilenames(initialdir='C:/Users/henry/Downloads', title='Select A File', filetypes=(("MP3 files", "*.mp3"),))
     for song in songs:
-        song = song.replace('C:/Users/16097/Downloads/', '')
+        song = song.replace('C:/Users/henry/Downloads/', '')
         song = song.replace('.mp3', '')
         song_box.insert(END, song)
 
 
+def play_time():
+    current_time = pygame.mixer.music.get_pos() / 1000
+    status_bar.after(1000, play_time)
+    converted_current_time = time.strftime('%M:%S', time.gmtime(current_time))
+    # song length
+    current_song = song_box.curselection()
+    song = song_box.get(current_song)
+    song = f'C:/Users/henry/Downloads/{song}.mp3'
+    mutagen_song = MP3(song)
+    song_length = mutagen_song.info.length
+    song_length_time = time.strftime('%M:%S', time.gmtime(song_length))
+    status_bar.config(text=f'{converted_current_time} - {song_length_time}')
+    if converted_current_time >= song_length_time:
+        next_song()
+    else:
+        None
+
+
 # button images
-play_img = PhotoImage(file='C:/Users/16097/Downloads/play button2.gif')
-stop_img = PhotoImage(file='C:/Users/16097/Downloads/stop button2.gif')
-pause_img = PhotoImage(file='C:/Users/16097/Downloads/pause button2.gif')
-nextsong_img = PhotoImage(file='C:/Users/16097/Downloads/next song button2.gif')
-pastsong_img = PhotoImage(file='C:/Users/16097/Downloads/past song button2.gif')
+play_img = PhotoImage(file='C:/Users/henry/Downloads/play button2.gif')
+stop_img = PhotoImage(file='C:/Users/henry/Downloads/stop button2.gif')
+pause_img = PhotoImage(file='C:/Users/henry/Downloads/pause button2.gif')
+nextsong_img = PhotoImage(file='C:/Users/henry/Downloads/next song button2.gif')
+pastsong_img = PhotoImage(file='C:/Users/henry/Downloads/past song button2.gif')
 
 # buttons
 play_button = Button(root, image=play_img, borderwidth=0, width=115, height=115, command=play_audio)
@@ -124,7 +146,7 @@ song_box.place(x=50, y=47)
 # labels
 now_playing = Label(root, text='Now Playing:', bg='black', fg='white')
 now_playing.configure(font=('Calibri', 25, 'bold'))
-now_playing.place(x=45, y=00)
+now_playing.place(x=45, y=0)
 
 # song menu
 my_menu = Menu(root)
@@ -137,7 +159,12 @@ add_song_menu.add_command(label="Add Song to Playlist", command=add_song)
 
 # volume slider
 volume_slider = ttk.Scale(root, from_=0, to=1, orient=HORIZONTAL, value=1, command=volume, length=250)
-volume_slider.place(x=700, y=430)
+volume_slider.place(x=700, y=440)
+
+# status bar
+status_bar = Label(root, text='', bg='black', fg='white', )
+status_bar.config(font=('Calibri', 15, 'bold'))
+status_bar.place(x=770, y=400)
 
 
 root.mainloop()
